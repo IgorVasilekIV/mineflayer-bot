@@ -55,6 +55,8 @@ function sendMc(msg, text) {
   return true
 }
 
+const chestPos = require('vec3')(-210, -60, 316)
+
 const funcs = {
   start: () => { startMc(); return 'start' },
   stop: () => { stopMc(); return 'stop' },
@@ -65,16 +67,38 @@ const funcs = {
     tg.sendMessage(CHAT_ID, `📍 X: ${p.x.toFixed(0)}, Y: ${p.y.toFixed(0)}, Z: ${p.z.toFixed(0)}`)
     return 'pos'
   },
+  chest: async () => {
+    if (!mcBot) return null
+    try {
+      const block = mcBot.blockAt(chestPos)
+      if (!block || !block.name.includes('chest')) {
+        tg.sendMessage(CHAT_ID, `❌ Сундук не найден на ${chestPos}`)
+        return 'chest'
+      }
+      const container = await mcBot.openContainer(block)
+      const items = container.containerItems()
+      if (items.length === 0) {
+        tg.sendMessage(CHAT_ID, '📦 Сундук пуст')
+      } else {
+        const list = items.map(i => `  • ${i.name} x${i.count}`).join('\n')
+        tg.sendMessage(CHAT_ID, `📦 Содержимое сундука:\n${list}`)
+      }
+      container.close()
+    } catch (err) {
+      tg.sendMessage(CHAT_ID, `❌ Ошибка: ${err.message}`)
+    }
+    return 'chest'
+  },
 }
 
 tg.onText(/\/say (.+)/, (msg, match) => {
   sendMc(msg, match[1]) && tg.sendMessage(msg.chat.id, `✅ Sent: ${match[1]}`)
 })
 
-tg.onText(/\/func (.+)/, (msg, match) => {
+tg.onText(/\/func (.+)/, async (msg, match) => {
   const name = match[1].trim().split(/\s+/)[0]
   if (!funcs[name]) return tg.sendMessage(msg.chat.id, `❌ Нет такой: ${name}. Доступны: ${Object.keys(funcs).join(', ')}`)
-  const result = funcs[name]()
+  const result = await funcs[name]()
   if (result === null) tg.sendMessage(msg.chat.id, `❌ Бот не запущен`)
 })
 
