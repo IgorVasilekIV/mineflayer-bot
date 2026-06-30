@@ -46,10 +46,10 @@ function startMc() {
     tg.sendMessage(CHAT_ID, `⚠️ Ошибка: ${reason}`)
   })
 
-  mcBot.on('chat', (username, message) => {
+  /*mcBot.on('chat', (username, message) => {
     tg.sendMessage(CHAT_ID, `<${username}>: ${message}`)
   })
-
+*/
   mcBot.on('message', (jsonMsg, position) => {
     if (position === 'game_info') return
     tg.sendMessage(CHAT_ID, `${jsonMsg}`)
