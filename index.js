@@ -55,7 +55,8 @@ function sendMc(msg, text) {
   return true
 }
 
-const chestPos = require('vec3')(-917, 107, -2410)
+// сундук
+const chestPos = require('vec3')(-917, 108, -2410)
 
 const funcs = {
   start: () => { startMc(); return 'start' },
