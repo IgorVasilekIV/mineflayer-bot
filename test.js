@@ -1,9 +1,11 @@
+require('dotenv').config();
+
 const mineflayer = require('mineflayer')
 const { TelegramBot } = require('node-telegram-bot-api')
 var AutoAuth = require('mineflayer-auto-auth')
 const https = require('https')
 
-const tg = new TelegramBot('8378909029:AAGbQFYRHXgCX4g9gEUSedHOxcwlDtI0PrU', { polling: true })
+const tg = new TelegramBot(process.env.TG_API, { polling: true })
 const CHAT_ID = '1078401181'
 
 const bot = mineflayer.createBot({
