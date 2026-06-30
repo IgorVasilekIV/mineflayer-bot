@@ -10,9 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.6.1",
     "mineflayer": "^4.37.1",
     "mineflayer-auto-auth": "^2.0.0",
-    "node-telegram-bot-api": "^1.1.2",
-    "dotenv": "^16.4.7"
+    "node-telegram-bot-api": "^1.1.2"
   }
 }
