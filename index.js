@@ -17,12 +17,17 @@ function startMc() {
     username: 'intermew',
     auth: 'offline',
     plugins: [AutoAuth],
-    AutoAuth: { logging: true, password: '568723', ignoreRepeat: true }
+    AutoAuth: { logging: true, password: '568723', ignoreRepeat: true },
+    standUntouched: true,
   })
 
   mcBot.on('login', () => {
-    mcBot.chat('Мяу, тестим бота')
     tg.sendMessage(CHAT_ID, '✅ Подключился к серверу')
+  })
+
+  mcBot.on('spawn', () => {
+    mcBot.waitForTicks(3)
+    mcBot.chat('/clan home')
   })
 
   mcBot.on('end', (reason) => {
@@ -40,7 +45,19 @@ function startMc() {
   })
 
   mcBot.on('chat', (username, message) => {
-    tg.sendMessage(CHAT_ID, `<${username}> ${message}`)
+    tg.sendMessage(CHAT_ID, `<${username}>: ${message}`)
+  })
+
+  mcBot.on('message', (jsonMsg, position) => {
+    if (position === 'game_info') return
+    tg.sendMessage(CHAT_ID, `${jsonMsg}`)
+  })
+
+  mcBot.on('message', (json) => {
+    const msg = json.toString()
+    if (msg.includes('IgorVasilekIV') && msg.includes('просит телепортироваться к вам')) {
+      mcBot.chat('/tpaccept')
+    }
   })
 }
 
@@ -61,11 +78,10 @@ const chestPos = require('vec3')(-917, 108, -2410)
 const funcs = {
   start: () => { startMc(); return 'start' },
   stop: () => { stopMc(); return 'stop' },
-  heal: () => mcBot ? (mcBot.chat('/heal'), 'heal') : null,
   pos: () => {
     if (!mcBot) return null
     const p = mcBot.entity.position
-    tg.sendMessage(CHAT_ID, `📍 X: ${p.x.toFixed(0)}, Y: ${p.y.toFixed(0)}, Z: ${p.z.toFixed(0)}`)
+    tg.sendMessage(CHAT_ID, `📍 X: <code>${p.x.toFixed(0)}</code>, Y: <code>${p.y.toFixed(0)}</code>, Z: <code>${p.z.toFixed(0)}</code>`, { parse_mode: 'HTML' })
     return 'pos'
   },
   chest: async () => {
@@ -73,7 +89,7 @@ const funcs = {
     try {
       const block = mcBot.blockAt(chestPos)
       if (!block || !block.name.includes('chest')) {
-        tg.sendMessage(CHAT_ID, `❌ Сундук не найден на ${chestPos}`)
+        tg.sendMessage(CHAT_ID, `❌ Сундук не найден на <code>${chestPos}</code>`, { parse_mode: 'HTML' })
         return 'chest'
       }
       const container = await mcBot.openContainer(block)
@@ -88,27 +104,27 @@ const funcs = {
         const total = Object.values(groups).reduce((a, b) => a + b, 0)
         const list = Object.entries(groups)
           .sort((a, b) => b[1] - a[1])
-          .map(([name, count]) => `  • ${name} x${count}`)
+          .map(([name, count]) => `  • <code>${name}</code> x<code>${count}</code>`)
           .join('\n')
-        tg.sendMessage(CHAT_ID, `📦 Сундук (${total} всего):\n${list}`)
+        tg.sendMessage(CHAT_ID, `📦 <b>Сундук</b> (<code>${total}</code> всего):\n${list}`, { parse_mode: 'HTML' })
       }
       container.close()
     } catch (err) {
-      tg.sendMessage(CHAT_ID, `❌ Ошибка: ${err.message}`)
+      tg.sendMessage(CHAT_ID, `❌ Ошибка: <code>${err.message}</code>`, { parse_mode: 'HTML' })
     }
     return 'chest'
   },
 }
 
-tg.onText(/\/say (.+)/, (msg, match) => {
-  sendMc(msg, match[1]) && tg.sendMessage(msg.chat.id, `✅ Sent: ${match[1]}`)
+tg.onText(/\/say (.+)/, async (msg, match) => {
+  sendMc(msg, match[1]) && tg.sendMessage(msg.chat.id, `✅ Sent: <code>${match[1]}</code>`, { parse_mode: 'HTML' })
 })
 
 tg.onText(/\/func (.+)/, async (msg, match) => {
   const name = match[1].trim().split(/\s+/)[0]
-  if (!funcs[name]) return tg.sendMessage(msg.chat.id, `❌ Нет такой: ${name}. Доступны: ${Object.keys(funcs).join(', ')}`)
+  if (!funcs[name]) return tg.sendMessage(msg.chat.id, `❌ Нет такой: <code>${name}</code>. Доступны: ${Object.keys(funcs).join(', ')}`, { parse_mode: 'HTML' })
   const result = await funcs[name]()
   if (result === null) tg.sendMessage(msg.chat.id, `❌ Бот не запущен`)
 })
 
-tg.sendMessage(CHAT_ID, '🟢 Telegram бот запущен. Используй /func start')
+tg.sendMessage(CHAT_ID, '🟢 Telegram бот запущен. Используй <code>/func start</code>', { parse_mode: 'HTML' })
