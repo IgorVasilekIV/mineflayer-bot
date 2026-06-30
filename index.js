@@ -81,8 +81,16 @@ const funcs = {
       if (items.length === 0) {
         tg.sendMessage(CHAT_ID, '📦 Сундук пуст')
       } else {
-        const list = items.map(i => `  • ${i.name} x${i.count}`).join('\n')
-        tg.sendMessage(CHAT_ID, `📦 Содержимое сундука:\n${list}`)
+        const groups = {}
+        for (const i of items) {
+          groups[i.name] = (groups[i.name] || 0) + i.count
+        }
+        const total = Object.values(groups).reduce((a, b) => a + b, 0)
+        const list = Object.entries(groups)
+          .sort((a, b) => b[1] - a[1])
+          .map(([name, count]) => `  • ${name} x${count}`)
+          .join('\n')
+        tg.sendMessage(CHAT_ID, `📦 Сундук (${total} всего):\n${list}`)
       }
       container.close()
     } catch (err) {
