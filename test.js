@@ -28,7 +28,12 @@ const funcs = {
     const p = bot.entity.position
     tg.sendMessage(CHAT_ID, `X: ${p.x}, Y: ${p.y}, Z: ${p.z}`)
   },
-  
+  stop: async () => {
+    tg.sendMessage(CHAT_ID, '🛑 Выключаюсь...')
+    tg.stopPolling()
+    bot.end()
+    process.exit(0)
+  },
 }
 
 tg.onText(/\/say (.+)/, (msg, match) => {
