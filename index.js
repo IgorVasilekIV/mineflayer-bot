@@ -28,6 +28,8 @@ function startMc() {
   mcBot.on('spawn', () => {
     mcBot.waitForTicks(3)
     mcBot.chat('/clan home')
+    mcBot.waitForTicks(60)
+    mcBot.setControlState('sneak', true)
   })
 
   mcBot.on('end', (reason) => {
