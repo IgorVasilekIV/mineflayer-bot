@@ -31,12 +31,14 @@ function startMc() {
   })
 
   mcBot.on('end', (reason) => {
-    tg.sendMessage(CHAT_ID, `🔌 Отключился: ${reason || 'неизвестно'}`)
+    const msg = typeof reason === 'object' ? reason.value || JSON.stringify(reason) : reason
+    tg.sendMessage(CHAT_ID, `🔌 Отключился: ${msg || 'неизвестно'}`)
     mcBot = null
   })
 
   mcBot.on('kicked', (reason) => {
-    tg.sendMessage(CHAT_ID, `❌ Кикнут: ${reason.value || JSON.stringify(reason)}`)
+    const msg = typeof reason === 'object' ? reason.value || JSON.stringify(reason) : reason
+    tg.sendMessage(CHAT_ID, `❌ Кикнут: ${msg}`)
     mcBot = null
   })
 
