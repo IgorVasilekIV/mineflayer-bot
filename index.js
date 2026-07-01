@@ -52,7 +52,8 @@ function startMc() {
 */
   mcBot.on('message', (jsonMsg, position) => {
     if (position === 'game_info') return
-    tg.sendMessage(CHAT_ID, `${jsonMsg}`)
+    const clean = jsonMsg.toString().replace(/[^\x20-\x7Eа-яА-ЯёЁ0-9\s]/g, '').trim()
+    if (clean) tg.sendMessage(CHAT_ID, clean)
   })
 
   mcBot.on('message', (json) => {
