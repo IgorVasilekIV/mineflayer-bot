@@ -8,6 +8,7 @@ const tg = new TelegramBot(process.env.IRON_TG_API, { polling: true })
 const CHAT_ID = '1078401181'
 
 let mcBot = null
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 function startMc() {
   if (mcBot) { tg.sendMessage(CHAT_ID, '❌ Бот уже запущен'); return }
@@ -26,8 +27,7 @@ function startMc() {
   })
 
   mcBot.on('spawn', () => {
-    mcBot.waitForTicks(3)
-    mcBot.chat('/clan home')
+    setTimeout(() => mcBot.chat('/clan home'), 2000)
   })
 
   mcBot.on('end', (reason) => {
