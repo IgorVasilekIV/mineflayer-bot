@@ -28,6 +28,7 @@ function startMc() {
 
   mcBot.on('spawn', () => {
     setTimeout(() => mcBot.chat('/clan home'), 2000)
+    setTimeout(() => mcBot.chat('/crawl'), 9000)
   })
 
   mcBot.on('end', (reason) => {
