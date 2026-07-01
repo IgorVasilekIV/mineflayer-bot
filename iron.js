@@ -14,8 +14,7 @@ function startMc() {
   if (mcBot) { tg.sendMessage(CHAT_ID, '❌ Бот уже запущен'); return }
 
   mcBot = mineflayer.createBot({
-    host: '89.35.130.14',
-    port: 25258,
+    host: 'kaminiacraft.rustix.cc',
     username: 'intermew',
     auth: 'offline',
     plugins: [AutoAuth],
