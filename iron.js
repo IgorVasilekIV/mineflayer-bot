@@ -4,7 +4,7 @@ const mineflayer = require('mineflayer')
 const { TelegramBot } = require('node-telegram-bot-api')
 const AutoAuth = require('mineflayer-auto-auth')
 
-const tg = new TelegramBot(process.env.TG_API, { polling: true })
+const tg = new TelegramBot(process.env.IRON_TG_API, { polling: true })
 const CHAT_ID = '1078401181'
 
 let mcBot = null
