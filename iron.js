@@ -36,7 +36,7 @@ function startMc() {
   })
 
   mcBot.on('kicked', (reason) => {
-    tg.sendMessage(CHAT_ID, `❌ Кикнут: ${reason}`)
+    tg.sendMessage(CHAT_ID, `❌ Кикнут: ${JSON.stringify(reason)}`)
     mcBot = null
   })
 
