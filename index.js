@@ -100,6 +100,23 @@ const funcs = {
       if (items.length === 0) {
         tg.sendMessage(CHAT_ID, '📦 Сундук пуст')
       } else {
+        const blockOf = {
+          iron_ingot: ['iron_block', 9], gold_ingot: ['gold_block', 9],
+          diamond: ['diamond_block', 9], emerald: ['emerald_block', 9],
+          netherite_ingot: ['netherite_block', 9], copper_ingot: ['copper_block', 9],
+          raw_iron: ['raw_iron_block', 9], raw_gold: ['raw_gold_block', 9],
+          raw_copper: ['raw_copper_block', 9],
+          coal: ['coal_block', 9], redstone: ['redstone_block', 9],
+          lapis_lazuli: ['lapis_block', 9], quartz: ['quartz_block', 9],
+          slime_ball: ['slime_block', 9], wheat: ['hay_block', 9],
+          bone_meal: ['bone_block', 9],
+          brick: ['brick_block', 4], nether_brick: ['nether_brick_block', 4],
+          snowball: ['snow_block', 4], amethyst_shard: ['amethyst_block', 4],
+        }
+        const itemOf = {}
+        for (const [item, [block, per]] of Object.entries(blockOf)) {
+          itemOf[block] = [item, per]
+        }
         const groups = {}
         for (const i of items) {
           groups[i.name] = (groups[i.name] || 0) + i.count
@@ -107,7 +124,13 @@ const funcs = {
         const total = Object.values(groups).reduce((a, b) => a + b, 0)
         const list = Object.entries(groups)
           .sort((a, b) => b[1] - a[1])
-          .map(([name, count]) => `  • <code>${name}</code> x<code>${count}</code>`)
+          .map(([name, count]) => {
+            const conv = blockOf[name]
+            if (conv) return `  • <code>${name}</code> x<code>${count}</code> (= ${Math.floor(count / conv[1])} ${conv[0]})`
+            const rev = itemOf[name]
+            if (rev) return `  • <code>${name}</code> x<code>${count}</code> (= ${count * rev[1]} ${rev[0]})`
+            return `  • <code>${name}</code> x<code>${count}</code>`
+          })
           .join('\n')
         tg.sendMessage(CHAT_ID, `📦 <b>Сундук</b> (<code>${total}</code> всего):\n${list}`, { parse_mode: 'HTML' })
       }
