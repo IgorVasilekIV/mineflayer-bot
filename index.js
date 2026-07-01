@@ -132,7 +132,7 @@ const funcs = {
             return `  • <code>${name}</code> x<code>${count}</code>`
           })
           .join('\n')
-        tg.sendMessage(CHAT_ID, `📦 <b>Сундук</b> (<code>${total}</code> всего):\n${list}`, { parse_mode: 'HTML' })
+        tg.sendMessage(CHAT_ID, `<tg-emoji emoji-id="6021525053567409034">🗃</tg-emoji> <b>Сундук</b> (<code>${total}</code> всего):\n${list}`, { parse_mode: 'HTML' })
       }
       container.close()
     } catch (err) {
