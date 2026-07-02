@@ -78,6 +78,7 @@ function sendMc(msg, text) {
 
 // сундук
 const chestPos = require('vec3')(-917, 108, -2410)
+let chestBusy = false
 
 const funcs = {
   start: () => { startMc(); return 'start' },
@@ -90,13 +91,19 @@ const funcs = {
   },
   chest: async () => {
     if (!mcBot) return null
+    if (chestBusy) {
+      tg.sendMessage(CHAT_ID, `⏳ Сундук уже открывается, подожди`)
+      return 'chest'
+    }
+    chestBusy = true
+    let container = null
     try {
       const block = mcBot.blockAt(chestPos)
       if (!block || !block.name.includes('chest')) {
         tg.sendMessage(CHAT_ID, `❌ Сундук не найден на <code>${chestPos}</code>`, { parse_mode: 'HTML' })
         return 'chest'
       }
-      const container = await mcBot.openContainer(block)
+      container = await mcBot.openContainer(block)
       const items = container.containerItems()
       if (items.length === 0) {
         tg.sendMessage(CHAT_ID, '📦 Сундук пуст')
@@ -135,9 +142,11 @@ const funcs = {
           .join('\n')
         tg.sendMessage(CHAT_ID, `<tg-emoji emoji-id="6021525053567409034">🗃</tg-emoji> <b>Сундук</b> (<code>${total}</code> всего):\n${list}`, { parse_mode: 'HTML' })
       }
-      container.close()
     } catch (err) {
       tg.sendMessage(CHAT_ID, `❌ Ошибка: <code>${err.message}</code>`, { parse_mode: 'HTML' })
+    } finally {
+      if (container) container.close()
+      chestBusy = false
     }
     return 'chest'
   },
