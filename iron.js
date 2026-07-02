@@ -103,7 +103,16 @@ const funcs = {
         tg.sendMessage(CHAT_ID, `❌ Сундук не найден на <code>${chestPos}</code>`, { parse_mode: 'HTML' })
         return 'chest'
       }
-      container = await mcBot.openContainer(block)
+      try {
+        container = await mcBot.openContainer(block)
+      } catch (e) {
+        if (e.message.includes('timeout') || e.message.includes('windowOpen')) {
+          await sleep(1000)
+          container = await mcBot.openContainer(block)
+        } else {
+          throw e
+        }
+      }
       const items = container.containerItems()
       if (items.length === 0) {
         tg.sendMessage(CHAT_ID, '📦 Сундук пуст')
