@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const mineflayer = require('mineflayer')
-const { TelegramBot, InlineKeyboardBuilder } = require('node-telegram-bot-api')
+const { TelegramBot } = require('node-telegram-bot-api')
 const AutoAuth = require('mineflayer-auto-auth')
 
 const tg = new TelegramBot(process.env.IRON_TG_API, { polling: true })
@@ -63,17 +63,21 @@ function startMc() {
       mcBot.chat('/tpaccept')
     }
   })
-}
 
   mcBot.on('chat', (username, message) => {
-  	if (message.includes('железный')) {
-  	  const kb = new InlineKeyboardBuilder()
-  	    .text("✅ Разрешить", "clan:invite")
-  	    .text("❌ Отклонить", "clan:reject")
-  	  tg.sendMessage(CHAT_ID, 'Запрос на вход в клан', { reply_markup: kb.build() })
-  	  mcBot.chat(`/clan invite ${username}`)
-  	}
+    if (message.includes('железный') || message.includes('клан')) {
+      tg.sendMessage(CHAT_ID, `📩 Запрос от <b>${username}</b>: <code>${message}</code>`, {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [[
+            { text: '✅ Разрешить', callback_data: `clan:invite:${username}` },
+            { text: '❌ Отклонить', callback_data: `clan:reject:${username}` },
+          ]]
+        }
+      })
+    }
   })
+}
 function stopMc() {
   if (!mcBot) { tg.sendMessage(CHAT_ID, '❌ Бот не запущен'); return }
   mcBot.end()
@@ -179,6 +183,20 @@ tg.onText(/\/func (.+)/, async (msg, match) => {
   if (!funcs[name]) return tg.sendMessage(msg.chat.id, `❌ Нет такой: <code>${name}</code>. Доступны: ${Object.keys(funcs).join(', ')}`, { parse_mode: 'HTML' })
   const result = await funcs[name]()
   if (result === null) tg.sendMessage(msg.chat.id, `❌ Бот не запущен`)
+})
+
+tg.on('callback_query', async (query) => {
+  const data = query.data
+  if (!data.startsWith('clan:')) return tg.answerCallbackQuery(query.id)
+  const [, action, username] = data.split(':')
+  if (action === 'invite') {
+    mcBot?.chat(`/clan invite ${username}`)
+    tg.sendMessage(CHAT_ID, `✅ Принял ${username} в клан`)
+  } else if (action === 'reject') {
+    mcBot?.chat(`/clan reject ${username}`)
+    tg.sendMessage(CHAT_ID, `❌ Отклонил ${username}`)
+  }
+  tg.answerCallbackQuery(query.id)
 })
 
 tg.sendMessage(CHAT_ID, '🟢 Telegram бот запущен. Используй <code>/func start</code>', { parse_mode: 'HTML' })
