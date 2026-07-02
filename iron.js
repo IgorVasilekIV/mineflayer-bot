@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const mineflayer = require('mineflayer')
-const { TelegramBot } = require('node-telegram-bot-api')
+const { TelegramBot, InlineKeyboardBuilder } = require('node-telegram-bot-api')
 const AutoAuth = require('mineflayer-auto-auth')
 
 const tg = new TelegramBot(process.env.IRON_TG_API, { polling: true })
@@ -65,6 +65,15 @@ function startMc() {
   })
 }
 
+  mcBot.on('chat', (username, message) => {
+  	if (message.includes('железный')) {
+  	  const kb = new InlineKeyboardBuilder()
+  	    .text("✅ Разрешить", "clan:invite")
+  	    .text("❌ Отклонить", "clan:reject")
+  	  tg.sendMessage(CHAT_ID, 'Запрос на вход в клан', { reply_markup: kb.build() })
+  	  mcBot.chat(`/clan invite ${username}`)
+  	}
+  })
 function stopMc() {
   if (!mcBot) { tg.sendMessage(CHAT_ID, '❌ Бот не запущен'); return }
   mcBot.end()
