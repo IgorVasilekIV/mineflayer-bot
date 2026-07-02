@@ -54,13 +54,12 @@ function startMc() {
   })
 
   mcBot.on('chat', (username, message) => {
-    if (message.includes('железный') || message.includes('клан')) {
+    if (message.includes('железный')) {
       tg.sendMessage(CHAT_ID, `📩 Запрос от <b>${username}</b>: <code>${message}</code>`, {
         parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [[
             { text: '✅ Разрешить', callback_data: `clan:invite:${username}` },
-            { text: '❌ Отклонить', callback_data: `clan:reject:${username}` },
           ]]
         }
       })
@@ -102,16 +101,10 @@ tg.onText(/\/func (.+)/, async (msg, match) => {
 })
 
 tg.on('callback_query', async (query) => {
-  const data = query.data
-  if (!data.startsWith('clan:')) return tg.answerCallbackQuery(query.id)
-  const [, action, username] = data.split(':')
-  if (action === 'invite') {
-    mcBot?.chat(`/clan invite ${username}`)
-    tg.sendMessage(CHAT_ID, `✅ Принял ${username} в клан`)
-  } else if (action === 'reject') {
-    mcBot?.chat(`/clan reject ${username}`)
-    tg.sendMessage(CHAT_ID, `❌ Отклонил ${username}`)
-  }
+  if (!query.data.startsWith('clan:')) return tg.answerCallbackQuery(query.id)
+  const username = query.data.split(':')[2]
+  mcBot?.chat(`/clan invite ${username}`)
+  tg.sendMessage(CHAT_ID, `✅ Принял ${username} в клан`)
   tg.answerCallbackQuery(query.id)
 })
 
