@@ -52,9 +52,20 @@ function startMc() {
       mcBot.chat('/tpaccept')
     }
   })
-
+  
   mcBot.on('chat', (username, message) => {
-    if (message.includes('железный')) {
+	if (username === 'IgorVasilekIV') {
+	  if (message.startsWith('./func')) {
+	    const name = message.trim().split(/\/func (.+)/)[0]
+	    if (!funcs[name]) mcBot.chat('Доступны pos, chest, restart функции')
+	    const result = await funcs[name](mcSender=true)
+	    if (result === null) tg.sendMessage(CHAT_ID, 'ошибочка чот')
+	  }
+	}
+  })
+  
+  mcBot.on('chat', (username, message) => {
+    if (message.includes('красный')) {
       tg.sendMessage(CHAT_ID, `📩 Запрос от <b>${username}</b>: <code>${message}</code>`, {
         parse_mode: 'HTML',
         reply_markup: {
@@ -78,9 +89,18 @@ function sendMc(msg, text) {
   return true
 }
 
+function restartMc() {
+  tg.sendMessage(CHAT_ID, '🔄 Перезапускаю')
+  stopMc()
+  sleep(1000)
+  startMc()
+}
+
+
 const funcs = {
   start: () => { startMc(); return 'start' },
   stop: () => { stopMc(); return 'stop' },
+  restart: () => { restartMc(); return 'restart' },
   pos: () => {
     if (!mcBot) return null
     const p = mcBot.entity.position

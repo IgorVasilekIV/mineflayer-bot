@@ -7,6 +7,7 @@ const AutoAuth = require('mineflayer-auto-auth')
 const tg = new TelegramBot(process.env.IRON_TG_API, { polling: true })
 const CHAT_ID = '1078401181'
 
+let mcSender = null
 let mcBot = null
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -65,6 +66,17 @@ function startMc() {
   })
 
   mcBot.on('chat', (username, message) => {
+  	if (username === 'IgorVasilekIV') {
+  		if (message.startsWith('./func')) {
+	  		const name = message.trim().split(/\/func (.+)/)[0]
+	  		if (!funcs[name]) mcBot.chat('Доступны pos, chest, restart функции')
+	  		const result = await funcs[name](mcSender=true)
+	  		if (result === null) tg.sendMessage(CHAT_ID, 'ошибочка чот\n')
+  		}
+  	}
+  })
+
+  mcBot.on('chat', (username, message) => {
     if (message.includes('железный')) {
       tg.sendMessage(CHAT_ID, `📩 Запрос от <b>${username}</b>: <code>${message}</code>`, {
         parse_mode: 'HTML',
@@ -88,6 +100,13 @@ function sendMc(msg, text) {
   return true
 }
 
+function restartMc() {
+  tg.sendMessage(CHAT_ID, '🔄 Перезапускаю')
+  stopMc()
+  sleep(1000)
+  startMc()
+}
+
 // сундук
 const chestPos = require('vec3')(-917, 108, -2410)
 let chestBusy = false
@@ -95,10 +114,13 @@ let chestBusy = false
 const funcs = {
   start: () => { startMc(); return 'start' },
   stop: () => { stopMc(); return 'stop' },
-  pos: () => {
+  restart: () => { restartMc(); return 'restart' },
+  pos: (mcSender) => {
     if (!mcBot) return null
     const p = mcBot.entity.position
-    tg.sendMessage(CHAT_ID, `📍 X: <code>${p.x.toFixed(0)}</code>, Y: <code>${p.y.toFixed(0)}</code>, Z: <code>${p.z.toFixed(0)}</code>`, { parse_mode: 'HTML' })
+    const toSend = `📍 X: ${p.x.toFixed(0)}, Y: ${p.y.toFixed(0)}, Z: ${p.z.toFixed(0)})`
+    if (mcSender != null) mcBot.chat(toSend)
+    tg.sendMessage(CHAT_ID, toSend, { parse_mode: 'HTML' })
     return 'pos'
   },
   chest: async () => {
