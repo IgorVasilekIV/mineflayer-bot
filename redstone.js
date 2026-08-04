@@ -7,7 +7,9 @@ const AutoAuth = require('mineflayer-auto-auth')
 const tg = new TelegramBot(process.env.RED_TG_API, { polling: true })
 const CHAT_ID = '1078401181'
 
+let mcSender = null
 let mcBot = null
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 function startMc() {
   if (mcBot) { tg.sendMessage(CHAT_ID, '❌ Бот уже запущен'); return }
@@ -30,16 +32,18 @@ function startMc() {
     setTimeout(() => mcBot.chat('/crawl'), 9000)
   })
 
+  const bot = mcBot
+
   mcBot.on('end', (reason) => {
     const msg = typeof reason === 'object' ? reason.value || JSON.stringify(reason) : reason
     tg.sendMessage(CHAT_ID, `🔌 Отключился: ${msg || 'неизвестно'}`)
-    mcBot = null
+    if (mcBot === bot) mcBot = null
   })
 
   mcBot.on('kicked', (reason) => {
     const msg = typeof reason === 'object' ? reason.value || JSON.stringify(reason) : reason
     tg.sendMessage(CHAT_ID, `❌ Кикнут: ${msg}`)
-    mcBot = null
+    if (mcBot === bot) mcBot = null
   })
 
   mcBot.on('error', (reason) => {
@@ -53,12 +57,12 @@ function startMc() {
     }
   })
   
-  mcBot.on('chat', (username, message) => {
+  mcBot.on('chat', async (username, message) => {
 	if (username === 'IgorVasilekIV') {
 	  if (message.startsWith('./func')) {
-	    const name = message.trim().split(/\/func (.+)/)[0]
-	    if (!funcs[name]) mcBot.chat('Доступны pos, chest, restart функции')
-	    const result = await funcs[name](mcSender=true)
+	    const name = message.trim().split(/\/func (.+)/)[1].trim().split(/\s+/)[0]
+	    if (!funcs[name]) return mcBot.chat(`Доступны ${Object.keys(funcs).join(', ')} функции`)
+	    const result = await funcs[name](true)
 	    if (result === null) tg.sendMessage(CHAT_ID, 'ошибочка чот')
 	  }
 	}
@@ -81,6 +85,7 @@ function startMc() {
 function stopMc() {
   if (!mcBot) { tg.sendMessage(CHAT_ID, '❌ Бот не запущен'); return }
   mcBot.end()
+  mcBot = null
 }
 
 function sendMc(msg, text) {
@@ -89,10 +94,10 @@ function sendMc(msg, text) {
   return true
 }
 
-function restartMc() {
+async function restartMc() {
   tg.sendMessage(CHAT_ID, '🔄 Перезапускаю')
   stopMc()
-  sleep(1000)
+  await sleep(1000)
   startMc()
 }
 
